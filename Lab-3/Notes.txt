@@ -1,0 +1,85 @@
+Dockerfile & Building Custom Images
+✅ Objectives:
+Learn how to create a Dockerfile
+
+Build custom images from a Dockerfile
+
+Run containers from your custom image
+
+🧰 Tasks:
+Create a simple Dockerfile:
+
+Create a new directory for your project:
+-----------------------------------------
+mkdir mydockerapp && cd mydockerapp
+-----------------------------------------
+Inside the directory, create a Dockerfile:
+
+-----------------------------------------
+touch Dockerfile
+-----------------------------------------
+Edit the Dockerfile:
+-----------------------------------------
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the current directory contents into the container
+COPY . /app
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Make port 5000 available to the world outside the container
+EXPOSE 5000
+
+# Define environment variable
+ENV NAME World
+
+# Run the application
+CMD ["python", "app.py"]
+-----------------------------------------
+Create a simple Python app (app.py):
+
+In the same directory, create app.py:
+-----------------------------------------
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Hello, Docker World!'
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+-----------------------------------------
+Create a requirements.txt:
+
+Add Flask to the requirements.txt file:
+
+-----------------------------------------
+Flask==2.0.1
+-----------------------------------------
+Build the custom image:
+
+-----------------------------------------
+docker build -t my-python-app .
+-----------------------------------------
+Run the container from your custom image:
+
+-----------------------------------------
+docker run -p 5000:5000 my-python-app
+-----------------------------------------
+Test your app:
+
+Open your browser and navigate to http://localhost:5000. You should see "Hello, Docker World!" displayed.
+
+Stop and clean up containers and images:
+-----------------------------------------
+docker ps
+docker stop <container_id>
+docker rm <container_id>
+docker rmi my-python-app
+-----------------------------------------
