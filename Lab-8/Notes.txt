@@ -1,0 +1,74 @@
+Docker Logs, Stats & Debugging Containers
+✅ Objectives:
+Learn how to inspect and troubleshoot running containers
+
+Monitor container performance and behavior
+
+Use Docker CLI tools for debugging
+
+🧰 Tasks:
+Start a container (your Flask app or nginx):
+
+bash
+Copy
+Edit
+docker run -d --name debug-app -p 5000:5000 yourdockerhubusername/my-python-app
+Check container logs:
+
+bash
+Copy
+Edit
+docker logs debug-app
+docker logs -f debug-app    # follow live logs
+View container resource usage (live stats):
+
+bash
+Copy
+Edit
+docker stats debug-app
+Inspect container details:
+
+bash
+Copy
+Edit
+docker inspect debug-app
+Run a shell inside a running container:
+
+bash
+Copy
+Edit
+docker exec -it debug-app bash
+Check processes inside the container:
+
+bash
+Copy
+Edit
+ps aux
+Check environment variables:
+
+bash
+Copy
+Edit
+env
+Copy a file from host to container and back:
+
+From host to container:
+
+bash
+Copy
+Edit
+echo "test debug" > debug.txt
+docker cp debug.txt debug-app:/app/
+From container to host:
+
+bash
+Copy
+Edit
+docker cp debug-app:/app/debug.txt debug-copy.txt
+Stop and clean up:
+
+bash
+Copy
+Edit
+docker stop debug-app
+docker rm debug-app
