@@ -1,0 +1,75 @@
+Docker Volumes & Persistent Data
+✅ Objectives:
+Understand Docker volumes and how they provide persistent storage for containers
+
+Create and use volumes with containers
+
+Learn how to mount host directories into containers
+
+🧰 Tasks:
+Create and run a container with a named volume:
+
+Create a container that uses a volume to store data:
+
+bash
+Copy
+Edit
+docker run -d --name db-container -v mydbdata:/var/lib/mysql mysql:5.7
+This will create a named volume called mydbdata and mount it to the MySQL container's data directory.
+
+Inspect the volume:
+
+Check the volume you created:
+
+bash
+Copy
+Edit
+docker volume inspect mydbdata
+Write some data to the volume:
+
+Access the container and write some data to the volume:
+
+bash
+Copy
+Edit
+docker exec -it db-container bash
+# Inside the container, interact with the database
+mysql -u root -p
+# After entering MySQL, create a simple database or table
+CREATE DATABASE test_db;
+USE test_db;
+CREATE TABLE test_table (id INT PRIMARY KEY, name VARCHAR(255));
+INSERT INTO test_table VALUES (1, 'DockerTest');
+Stop the container and start a new one using the same volume:
+
+Stop and remove the container:
+
+bash
+Copy
+Edit
+docker stop db-container
+docker rm db-container
+Run a new container with the same volume:
+
+bash
+Copy
+Edit
+docker run -d --name db-container-2 -v mydbdata:/var/lib/mysql mysql:5.7
+Check if the data you inserted earlier is still there:
+
+bash
+Copy
+Edit
+docker exec -it db-container-2 mysql -u root -p
+# Enter MySQL and check for the database and table
+USE test_db;
+SELECT * FROM test_table;
+Mount a host directory into a container:
+
+Run a container with a directory from your host system mounted into the container:
+
+bash
+Copy
+Edit
+docker run -d -v /path/to/host/dir:/container/dir ubuntu
+Make changes on your host and see how they reflect inside the container.
