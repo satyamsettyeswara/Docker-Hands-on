@@ -1,0 +1,49 @@
+Running Your First Real Container
+✅ Objectives:
+Understand basic docker run options
+
+Pull and run containers interactively and in detached mode
+
+Clean up containers
+
+🧰 Tasks:
+Run an Ubuntu container interactively:
+--------------------------------------
+docker run -it ubuntu bash
+--------------------------------------
+Inside the container, try:
+
+--------------------------------------
+apt update
+apt install curl
+curl google.com
+--------------------------------------
+Exit with exit.
+
+Run an Nginx container in detached mode:
+
+--------------------------------------
+docker run -d --name mynginx -p 8080:80 nginx
+--------------------------------------
+Open your browser and go to http://localhost:8080
+
+Check running containers:
+--------------------------------------
+docker ps
+--------------------------------------
+View logs from your Nginx container:
+
+--------------------------------------
+docker logs mynginx
+--------------------------------------
+Stop and remove the container:
+
+--------------------------------------
+docker stop mynginx
+docker rm mynginx
+--------------------------------------
+List all containers (including stopped ones):
+
+--------------------------------------
+docker ps -a
+--------------------------------------
