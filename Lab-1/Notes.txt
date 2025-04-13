@@ -1,0 +1,27 @@
+Lab 1 - Installing Docker
+✅ Objectives:
+Ensure Docker is installed and running
+
+Verify Docker version and info
+
+Run a test container (hello-world)
+
+🧪 Tasks:
+Check if Docker is already installed:
+------------------------------------------------
+docker --version
+docker info
+------------------------------------------------
+If not installed, follow the guide for your environment (Linux, WSL, Mac, Windows):
+
+Install Docker
+
+Test Docker with a container:
+------------------------------------------------
+docker run hello-world
+------------------------------------------------
+Verify Docker is running:
+
+------------------------------------------------
+docker ps
+------------------------------------------------
