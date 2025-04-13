@@ -1,0 +1,57 @@
+Docker Compose for Multi-Container Apps
+✅ Objectives:
+Understand docker-compose.yml
+
+Run multiple containers with a single command
+
+Connect services together (e.g., web + db)
+
+🧰 Tasks:
+Create a project directory:
+
+bash
+Copy
+Edit
+mkdir docker-compose-lab && cd docker-compose-lab
+Create a docker-compose.yml file:
+
+yaml
+Copy
+Edit
+version: "3.8"
+services:
+  web:
+    image: nginx
+    ports:
+      - "8080:80"
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+Start the multi-container app:
+
+bash
+Copy
+Edit
+docker-compose up -d
+Verify the services are running:
+
+bash
+Copy
+Edit
+docker-compose ps
+Check if Nginx is working: http://localhost:8080
+
+Check logs for both services:
+
+bash
+Copy
+Edit
+docker-compose logs web
+docker-compose logs db
+Bring everything down:
+
+bash
+Copy
+Edit
+docker-compose down
