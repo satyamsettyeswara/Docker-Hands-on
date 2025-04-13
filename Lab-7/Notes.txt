@@ -1,0 +1,54 @@
+ Docker Registry: Push & Pull Images
+✅ Objectives:
+Tag your custom image
+
+Push it to Docker Hub (or a private registry if you prefer)
+
+Pull it from the registry on another system or clean environment
+
+🧰 Tasks:
+Log in to Docker Hub:
+
+bash
+Copy
+Edit
+docker login
+Use your Docker Hub credentials.
+
+If you don’t have an account, create one here: https://hub.docker.com
+
+Rebuild your Python Flask app image (from Lab 3) if needed:
+
+Make sure you’re in the app directory, then:
+
+bash
+Copy
+Edit
+docker build -t my-python-app .
+Tag the image with your Docker Hub username:
+
+bash
+Copy
+Edit
+docker tag my-python-app yourdockerhubusername/my-python-app:latest
+Push the image to Docker Hub:
+
+bash
+Copy
+Edit
+docker push yourdockerhubusername/my-python-app:latest
+Test it by pulling the image:
+
+You can do this on the same machine after removing the local image:
+
+bash
+Copy
+Edit
+docker rmi yourdockerhubusername/my-python-app:latest
+docker pull yourdockerhubusername/my-python-app:latest
+Run it again to verify:
+
+bash
+Copy
+Edit
+docker run -p 5000:5000 yourdockerhubusername/my-python-app:latest
