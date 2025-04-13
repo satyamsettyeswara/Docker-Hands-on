@@ -1,0 +1,52 @@
+Docker Networks & Communication Between Containers
+✅ Objectives:
+Learn about Docker’s networking modes
+
+Create a custom network
+
+Run multiple containers that communicate with each other
+
+🧰 Tasks:
+Create a user-defined bridge network:
+
+bash
+Copy
+Edit
+docker network create my-net
+Start a simple database container on the custom network:
+
+bash
+Copy
+Edit
+docker run -d --name my-postgres --network my-net -e POSTGRES_PASSWORD=mysecretpassword postgres
+Start a second container on the same network and connect to the DB:
+
+bash
+Copy
+Edit
+docker run -it --rm --network my-net postgres psql -h my-postgres -U postgres
+Enter the password: mysecretpassword
+
+Inside Postgres, try creating a table:
+
+sql
+Copy
+Edit
+CREATE TABLE network_test (id INT, name TEXT);
+INSERT INTO network_test VALUES (1, 'From Docker Network');
+SELECT * FROM network_test;
+List networks and inspect them:
+
+bash
+Copy
+Edit
+docker network ls
+docker network inspect my-net
+Clean up:
+
+bash
+Copy
+Edit
+docker stop my-postgres
+docker rm my-postgres
+docker network rm my-net
