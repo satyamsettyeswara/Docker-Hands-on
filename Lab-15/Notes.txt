@@ -1,0 +1,109 @@
+ConfigMaps, Secrets, and Health Checks in Kubernetes
+We'll improve your deployment by:
+
+Using ConfigMaps and Secrets more elegantly.
+
+Adding Liveness and Readiness Probes to your Pods.
+
+Preparing for auto-healing and rolling updates.
+
+🧩 Step 1: Replace Hardcoded Flask Config with ConfigMap
+Instead of baking environment variables or app configs into the Docker image, let’s pass them via Kubernetes ConfigMaps.
+
+1️⃣ Create a new file flask-config.yaml
+yaml
+Copy
+Edit
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flask-config
+data:
+  FLASK_ENV: "production"
+  APP_NAME: "KubeFlaskApp"
+2️⃣ Update your flask-deployment.yaml
+Add envFrom to load config:
+
+yaml
+Copy
+Edit
+spec:
+  containers:
+    - name: flask
+      image: flask-app:latest
+      ports:
+        - containerPort: 5000
+      envFrom:
+        - configMapRef:
+            name: flask-config
+🔒 Step 2: Use Secrets for Sensitive Values
+Let’s simulate an API key or DB password.
+
+1️⃣ Create a Secret:
+bash
+Copy
+Edit
+kubectl create secret generic flask-secrets \
+  --from-literal=API_KEY=super-secret-key \
+  --from-literal=DB_PASSWORD=admin123
+2️⃣ Update flask-deployment.yaml:
+yaml
+Copy
+Edit
+      env:
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flask-secrets
+              key: API_KEY
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: flask-secrets
+              key: DB_PASSWORD
+Now your app can access API_KEY and DB_PASSWORD securely from environment variables.
+
+❤️ Step 3: Add Health Checks (Probes)
+Kubernetes can auto-restart failed pods if we give it health checks.
+
+Add to flask-deployment.yaml:
+yaml
+Copy
+Edit
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 5000
+        initialDelaySeconds: 10
+        periodSeconds: 15
+
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 5000
+        initialDelaySeconds: 5
+        periodSeconds: 10
+Liveness Probe checks if the app is alive (restart if not).
+Readiness Probe checks if it’s ready to serve traffic (don't route requests until it is).
+
+✅ Step 4: Apply Everything
+bash
+Copy
+Edit
+kubectl apply -f flask-config.yaml
+kubectl apply -f flask-deployment.yaml
+Then verify:
+
+bash
+Copy
+Edit
+kubectl get pods
+kubectl describe pod <your-flask-pod-name>
+🧠 Bonus Tip: View Pod Environment
+To check if the variables are injected properly:
+
+bash
+Copy
+Edit
+kubectl exec -it <flask-pod-name> -- printenv
+Look for API_KEY, FLASK_ENV, etc.
