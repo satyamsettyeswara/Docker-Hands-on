@@ -1,0 +1,187 @@
+Kubernetes – Deploying Dockerized Apps to a Kubernetes Cluster
+We’ll take your existing Flask + NGINX + Docker setup and deploy it on Kubernetes. You’ll learn:
+
+How to containerize and deploy your app on Kubernetes.
+
+How to manage containers with pods, deployments, and services.
+
+How to scale your app and manage replicas.
+
+🧪 Prerequisites:
+Kubernetes Cluster: You can run Kubernetes locally using Minikube or use a cloud provider (AWS EKS, GCP GKE, or Azure AKS).
+
+kubectl installed: The Kubernetes CLI tool. You can install it with:
+
+bash
+Copy
+Edit
+# For MacOS
+brew install kubectl
+
+# For Linux
+sudo apt-get install -y kubectl
+Step 1: Install Minikube (if using local Kubernetes)
+If you're using Minikube to run Kubernetes locally:
+
+Install Minikube:
+
+bash
+Copy
+Edit
+# For MacOS
+brew install minikube
+
+# For Linux
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo mv minikube-linux-amd64 /usr/local/bin/minikube
+Start your Minikube cluster:
+
+bash
+Copy
+Edit
+minikube start
+Verify your cluster is up and running:
+
+bash
+Copy
+Edit
+kubectl get nodes
+Step 2: Kubernetes Configuration Files
+In your project folder (myapp/), we need to create Kubernetes deployment and service files for the Flask app.
+
+flask-deployment.yaml
+This file defines a Deployment that will manage a set of pods running your Flask app.
+
+yaml
+Copy
+Edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask
+  template:
+    metadata:
+      labels:
+        app: flask
+    spec:
+      containers:
+        - name: flask
+          image: flask-app:latest
+          ports:
+            - containerPort: 5000
+replicas: 2: This creates 2 pods (copies of your app).
+
+containerPort: 5000: Exposes the Flask app on port 5000.
+
+nginx-deployment.yaml
+Now, define the NGINX Deployment to reverse-proxy traffic to the Flask app.
+
+yaml
+Copy
+Edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+              subPath: default.conf
+            - name: ssl-certs
+              mountPath: /etc/nginx/certs
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: nginx-config
+        - name: ssl-certs
+          secret:
+            secretName: nginx-ssl
+nginx-conf: Mounts your NGINX config (default.conf).
+
+ssl-certs: Mounts SSL certificates (cert.pem, key.pem).
+
+nginx-service.yaml
+Define a Service to expose NGINX and allow traffic to your app:
+
+yaml
+Copy
+Edit
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
+type: LoadBalancer: This exposes your app externally (useful in cloud environments).
+
+Step 3: Create ConfigMap and Secret (for NGINX config and SSL certs)
+You’ll need to create a ConfigMap for the NGINX configuration and a Secret for the SSL certificates.
+
+Create ConfigMap (NGINX config):
+
+bash
+Copy
+Edit
+kubectl create configmap nginx-config --from-file=nginx/default.conf
+Create Secret (SSL certificates):
+
+bash
+Copy
+Edit
+kubectl create secret tls nginx-ssl --cert=nginx/cert.pem --key=nginx/key.pem
+Step 4: Deploy to Kubernetes
+Apply the deployment files:
+
+bash
+Copy
+Edit
+kubectl apply -f flask-deployment.yaml
+kubectl apply -f nginx-deployment.yaml
+kubectl apply -f nginx-service.yaml
+Verify the deployments:
+
+bash
+Copy
+Edit
+kubectl get deployments
+kubectl get pods
+kubectl get services
+Step 5: Access the App
+If you're using Minikube:
+
+Run minikube service nginx-service to open the NGINX service in your browser.
+
+If you’re using a cloud provider (e.g., AWS, GCP), you’ll get an external IP address from the nginx-service:
+
+bash
+Copy
+Edit
+kubectl get svc nginx-service
+Visit the URL and you should see your Flask app being served via NGINX on HTTPS!
+
