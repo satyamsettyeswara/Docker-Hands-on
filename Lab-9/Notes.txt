@@ -1,0 +1,75 @@
+Dockerizing a Full Web App (Python or Node.js)
+✅ Objectives:
+Take a real app (with routes, logic, maybe a database)
+
+Dockerize it cleanly using Dockerfile and optionally docker-compose
+
+Test it end-to-end inside a container
+
+🧰 Tasks:
+🚀 Option A: Dockerize a Python Flask App (recommended for continuity)
+Set up your Flask app (same structure as Lab 3 but more robust):
+
+app.py
+
+python
+Copy
+Edit
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return 'Welcome to your full Dockerized Flask App!'
+
+@app.route('/api/data', methods=['POST'])
+def data():
+    content = request.json
+    return jsonify({"you_sent": content}), 200
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+requirements.txt
+
+nginx
+Copy
+Edit
+Flask
+Write the Dockerfile:
+
+dockerfile
+Copy
+Edit
+FROM python:3.9-slim
+WORKDIR /app
+COPY . /app
+RUN pip install --no-cache-dir -r requirements.txt
+EXPOSE 5000
+CMD ["python", "app.py"]
+Build and run the app:
+
+bash
+Copy
+Edit
+docker build -t full-flask-app .
+docker run -p 5000:5000 full-flask-app
+Test endpoints:
+
+In browser: http://localhost:5000
+
+Using curl:
+
+bash
+Copy
+Edit
+curl -X POST -H "Content-Type: application/json" -d '{"key": "value"}' http://localhost:5000/api/data
+
+ Optional Bonus: Docker Compose
+If you're up for a bonus:
+
+Add a Postgres service in docker-compose.yml
+
+Connect your Flask app to it
+
+Try reading/writing data via SQLAlchemy
