@@ -75,3 +75,86 @@ docker-compose up --build
 Then visit:
 
 🌐 https://localhost:8443
+
+HTTP-to-HTTPS Redirect + Basic Auth
+
+🔧 Step 1: Configure NGINX to Redirect HTTP to HTTPS
+First, update your nginx/default.conf to redirect all HTTP traffic to HTTPS.
+
+Updated nginx/default.conf:
+nginx
+Copy
+Edit
+# Redirect HTTP to HTTPS
+server {
+    listen 80;
+    server_name localhost;
+    return 301 https://$host$request_uri;
+}
+
+# Serve HTTPS
+server {
+    listen 443 ssl;
+    server_name localhost;
+
+    ssl_certificate     /etc/nginx/certs/cert.pem;
+    ssl_certificate_key /etc/nginx/certs/key.pem;
+
+    location / {
+        proxy_pass http://flask:5000;
+    }
+}
+🧪 Step 2: Add Basic Authentication (optional)
+This will require a user to authenticate via a username and password before accessing your app.
+
+Install htpasswd to generate a password file:
+
+On Ubuntu:
+
+bash
+Copy
+Edit
+sudo apt-get install apache2-utils
+Generate the password file:
+
+bash
+Copy
+Edit
+htpasswd -c ./nginx/.htpasswd yourusername
+You'll be prompted to enter a password. This will generate the .htpasswd file in the nginx/ directory.
+
+Update nginx/default.conf to enable Basic Auth:
+
+nginx
+Copy
+Edit
+server {
+    listen 80;
+    server_name localhost;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name localhost;
+
+    ssl_certificate     /etc/nginx/certs/cert.pem;
+    ssl_certificate_key /etc/nginx/certs/key.pem;
+
+    location / {
+        auth_basic "Restricted Area";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        proxy_pass http://flask:5000;
+    }
+}
+🧳 Step 3: Rebuild & Test
+Rebuild and run the Docker containers:
+
+bash
+Copy
+Edit
+docker-compose down
+docker-compose up --build
+Test:
+
+Open https://localhost:8443 and you should be redirected from HTTP to HTTPS automatically.
