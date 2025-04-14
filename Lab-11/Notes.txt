@@ -1,0 +1,84 @@
+Dockerize a Flask App with NGINX + HTTPS (local test version)
+✅ Objectives:
+Serve a Flask app behind NGINX
+
+Use Docker Compose to run everything
+
+Set up NGINX as a reverse proxy
+
+(Later) Add Certbot for HTTPS when you have a public domain
+
+🧱 Structure
+Your project folder:
+
+cpp
+Copy
+Edit
+myapp/
+├── app/
+│   ├── app.py
+│   └── requirements.txt
+├── nginx/
+│   └── default.conf
+├── docker-compose.yml
+├── Dockerfile
+🔧 Step 1: Flask App (app/app.py)
+python
+Copy
+Edit
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Hello from Docker + NGINX!"
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+📦 Step 2: requirements.txt
+nginx
+Copy
+Edit
+Flask
+🐳 Step 3: Dockerfile
+dockerfile
+Copy
+Edit
+FROM python:3.9-slim
+WORKDIR /app
+COPY app/ /app
+RUN pip install --no-cache-dir -r requirements.txt
+CMD ["python", "app.py"]
+🌐 Step 4: NGINX config (nginx/default.conf)
+nginx
+Copy
+Edit
+server {
+    listen 80;
+    location / {
+        proxy_pass http://flask:5000;
+    }
+}
+📦 Step 5: docker-compose.yml
+yaml
+Copy
+Edit
+version: "3.8"
+services:
+  flask:
+    build: .
+    container_name: flask-app
+  nginx:
+    image: nginx
+    container_name: nginx-proxy
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - flask
+▶️ Step 6: Run it
+bash
+Copy
+Edit
+docker-compose up --build
