@@ -1,0 +1,106 @@
+Docker + Jenkins CI/CD Pipeline
+Step 1: Set up Jenkins
+Install Jenkins (if you haven't already):
+
+For local Jenkins setup, run it in Docker:
+
+bash
+Copy
+Edit
+docker run -d -p 8080:8080 --name jenkins --volume jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+Access Jenkins:
+
+Go to http://localhost:8080
+
+You'll be prompted to unlock Jenkins using a password:
+
+Get the password:
+
+bash
+Copy
+Edit
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+Step 2: Dockerize Jenkins Pipeline
+Create Jenkinsfile (pipeline script):
+
+In your myapp/ folder, create a Jenkinsfile that defines the pipeline:
+
+groovy
+Copy
+Edit
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'flask-app'
+        DOCKER_REGISTRY = 'docker.io' // or your custom registry
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    // Build Docker image
+                    docker.build("${DOCKER_IMAGE}")
+                }
+            }
+        }
+
+        stage('Push to Registry') {
+            steps {
+                script {
+                    // Tag the image
+                    docker.image("${DOCKER_IMAGE}").tag("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest")
+                    
+                    // Push to Docker Hub or custom registry
+                    docker.withRegistry('https://docker.io', 'docker-hub-credentials') {
+                        docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest").push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    // Deploy the container (could be locally or cloud-based)
+                    sh 'docker-compose down && docker-compose up -d'
+                }
+            }
+        }
+    }
+}
+Add Docker Hub Credentials to Jenkins:
+
+Go to Jenkins > Manage Jenkins > Manage Credentials.
+
+Add your Docker Hub username and password under "Docker Hub credentials" with the ID docker-hub-credentials.
+
+Step 3: Create Jenkins Job
+Create a New Jenkins Job:
+
+Go to Jenkins > New Item, name it flask-app-pipeline, and choose Pipeline.
+
+Configure the Pipeline:
+
+In the job configuration, under Pipeline, select Pipeline script from SCM.
+
+Set the SCM to Git (or use GitHub) and point it to your project repository.
+
+Make sure your Jenkinsfile is in the root directory of your repo.
+
+Step 4: Trigger the Pipeline
+Commit your changes (including the Jenkinsfile).
+
+Run the Jenkins job manually from Jenkins UI or automatically via SCM trigger when you push code changes.
+
+Step 5: Verify Deployment
+Once the pipeline runs successfully, check that Jenkins:
+
+Builds the Docker image.
+
+Pushes it to Docker Hub.
+
+Deploys the container (locally, in your case).
+
+Test the deployed app on https://localhost:8443.
