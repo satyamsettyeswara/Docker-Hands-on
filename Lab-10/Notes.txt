@@ -1,0 +1,100 @@
+Docker Swarm & Orchestration Basics
+💡 Docker Swarm lets you manage a cluster of Docker nodes as a single virtual system. You can scale services, maintain high availability, and deploy containers across multiple machines.
+
+We’ll do this lab even if you’re running a single node — Docker will treat it as a “Swarm cluster of one” (which is great for learning).
+
+✅ Objectives:
+Initialize Docker Swarm
+
+Deploy a service
+
+Scale the service up/down
+
+Update the service
+
+Remove the stack
+
+🧰 Tasks:
+Initialize Swarm:
+
+bash
+Copy
+Edit
+docker swarm init
+📝 It will return a join token. Ignore it for now — that’s for adding worker nodes.
+
+Deploy a simple service (nginx):
+
+bash
+Copy
+Edit
+docker service create --name web-server -p 8080:80 nginx
+List the service and tasks (containers):
+
+bash
+Copy
+Edit
+docker service ls
+docker service ps web-server
+Scale the service to 3 replicas:
+
+bash
+Copy
+Edit
+docker service scale web-server=3
+Verify scaling:
+
+bash
+Copy
+Edit
+docker service ps web-server
+docker container ls
+Update the service (e.g., use a different image tag):
+
+bash
+Copy
+Edit
+docker service update --image nginx:alpine web-server
+You’ll see a rolling update happen.
+
+Remove the service:
+
+bash
+Copy
+Edit
+docker service rm web-server
+(Optional) Deploy via Stack using Compose file:
+
+Create a file stack.yml:
+
+yaml
+Copy
+Edit
+version: "3.8"
+services:
+  web:
+    image: nginx
+    ports:
+      - "8080:80"
+    deploy:
+      replicas: 2
+Deploy it:
+
+bash
+Copy
+Edit
+docker stack deploy -c stack.yml mystack
+Check status:
+
+bash
+Copy
+Edit
+docker stack ls
+docker stack services mystack
+docker stack ps mystack
+Remove stack:
+
+bash
+Copy
+Edit
+docker stack rm mystack
