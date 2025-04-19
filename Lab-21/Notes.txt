@@ -1,0 +1,78 @@
+Locking Down the Docker Daemon
+🎯 Goal:
+Harden the Docker daemon configuration to reduce security risks in production environments.
+
+✅ Step 1: Disable the Docker API from Listening on a Public Interface (If Applicable)
+🔒 By default, Docker only listens on a Unix socket (/var/run/docker.sock). But if you've enabled it over TCP (tcp://0.0.0.0:2375), that's a huge security risk.
+
+Check your Docker daemon settings:
+
+bash
+Copy
+Edit
+ps aux | grep dockerd
+If you see tcp://0.0.0.0:2375, edit the daemon config to remove it:
+
+bash
+Copy
+Edit
+sudo nano /etc/docker/daemon.json
+Make sure it looks like this (or add to it):
+
+json
+Copy
+Edit
+{
+  "hosts": ["unix:///var/run/docker.sock"]
+}
+Then restart Docker:
+
+bash
+Copy
+Edit
+sudo systemctl restart docker
+✅ Step 2: Enable Live Restore (Optional but Recommended)
+This keeps containers running even if the Docker daemon crashes or restarts.
+
+Add this to /etc/docker/daemon.json:
+
+json
+Copy
+Edit
+{
+  "live-restore": true
+}
+🔄 Pros: Increases uptime and reduces container restarts on daemon issues.
+⚠️ Cons: May cause confusion if the daemon is unavailable but containers are still running (e.g., harder to troubleshoot issues without logs).
+
+Restart Docker to apply:
+
+bash
+Copy
+Edit
+sudo systemctl restart docker
+✅ Step 3: Disable Legacy Container Features (Optional)
+For example, disable inter-container communication (ICC) unless you explicitly need it:
+
+json
+Copy
+Edit
+{
+  "icc": false
+}
+🔒 Pros: Prevents containers from freely talking to each other by default.
+⚠️ Cons: You’ll need to explicitly allow communication where necessary (e.g., via custom networks).
+
+✅ Step 4: Use Seccomp and AppArmor (Advanced)
+Docker already ships with a default seccomp profile. You can check it like this:
+
+bash
+Copy
+Edit
+docker info | grep -i seccomp
+You can also specify a custom seccomp profile with:
+
+bash
+Copy
+Edit
+docker run --security-opt seccomp=/path/to/profile.json ...
