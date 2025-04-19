@@ -1,0 +1,37 @@
+ Create a Custom Docker Network and Connect Containers
+🎯 Goal:
+Create a custom Docker network.
+
+Run multiple containers on it.
+
+Test communication using container names (Docker DNS).
+
+🛠️ Step-by-Step Instructions:
+✅ Step 1: Create a Custom Bridge Network
+bash
+Copy
+Edit
+docker network create --driver bridge my_custom_network
+This creates a new network called my_custom_network using the bridge driver.
+
+✅ Step 2: Run Two Containers on This Network
+bash
+Copy
+Edit
+docker run -dit --name container1 --network my_custom_network alpine sh
+docker run -dit --name container2 --network my_custom_network alpine sh
+We're using the lightweight alpine image and starting a shell session with sh.
+
+✅ Step 3: Test Communication Between Containers
+bash
+Copy
+Edit
+docker exec -it container1 ping container2
+You should see output like:
+
+python
+Copy
+Edit
+PING container2 (172.18.0.3): 56 data bytes
+64 bytes from 172.18.0.3: seq=0 ttl=64 time=0.079 ms
+If this works, Docker DNS resolution within the custom network is working!
