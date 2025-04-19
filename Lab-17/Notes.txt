@@ -1,0 +1,42 @@
+Docker DNS Resolution and Network Aliases
+🎯 Goal:
+Understand how Docker handles internal DNS.
+
+Set up and test network aliases for flexible naming inside a network.
+
+🛠️ Step-by-Step Instructions:
+✅ Step 1: Create a New Container With a Network Alias
+Let’s run a new container named container3 and assign it a network alias.
+
+bash
+Copy
+Edit
+docker run -dit \
+  --name container3 \
+  --network my_custom_network \
+  --network-alias alias3 \
+  alpine sh
+Now container3 can be accessed using both container3 and alias3.
+
+✅ Step 2: Ping Using the Alias From Another Container
+Let’s exec into container1 again and ping alias3.
+
+bash
+Copy
+Edit
+docker exec -it container1 sh
+# Inside the shell:
+ping -c 3 alias3
+You should see replies from alias3, proving Docker DNS resolves both names.
+
+Type exit to leave the shell.
+
+✅ Step 3 (Optional): Inspect the Network
+You can inspect your custom network to see connected containers and aliases:
+
+bash
+Copy
+Edit
+docker network inspect my_custom_network
+Look under the Containers section—you'll see all connected containers and their aliases.
+
