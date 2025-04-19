@@ -1,0 +1,68 @@
+Docker Image Signing with cosign (by Sigstore)
+🎯 Goal:
+Sign your Docker images with a key.
+
+Verify the image before pulling or running it.
+
+🛠️ We'll Use: cosign
+✅ Step 1: Install cosign
+Ubuntu (using Go):
+
+bash
+Copy
+Edit
+sudo apt install -y golang-go
+go install github.com/sigstore/cosign/v2/cmd/cosign@latest
+export PATH=$PATH:$(go env GOPATH)/bin
+Mac (Homebrew):
+
+bash
+Copy
+Edit
+brew install cosign
+To check it’s installed:
+
+bash
+Copy
+Edit
+cosign version
+✅ Step 2: Create a Key Pair for Signing
+bash
+Copy
+Edit
+cosign generate-key-pair
+This generates:
+
+cosign.key (private)
+
+cosign.pub (public)
+
+IMPORTANT: Never share cosign.key. Store it securely.
+
+✅ Step 3: Tag and Push a Docker Image to Docker Hub (or another registry)
+Let’s tag and push an image:
+
+bash
+Copy
+Edit
+docker tag alpine <your-dockerhub-username>/alpine-signed
+docker push <your-dockerhub-username>/alpine-signed
+✅ Step 4: Sign the Image
+bash
+Copy
+Edit
+cosign sign --key cosign.key <your-dockerhub-username>/alpine-signed
+You’ll be prompted for a password (used to encrypt cosign.key).
+
+✅ Step 5: Verify the Image Signature
+bash
+Copy
+Edit
+cosign verify --key cosign.pub <your-dockerhub-username>/alpine-signed
+You’ll see something like:
+
+arduino
+Copy
+Edit
+Verification for <image> -- success
+✅ Boom — your image is now cryptographically signed and verifiable!
