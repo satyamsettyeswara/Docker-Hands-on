@@ -1,0 +1,85 @@
+Build and Push Docker Images from a Jenkins Pipeline
+🎯 Goal:
+Set up a Jenkins pipeline that:
+
+Builds a Docker image
+
+Tags it
+
+Pushes it to Docker Hub
+
+✅ Prerequisites:
+Jenkins is installed and running
+
+Docker is installed on the same machine as Jenkins
+
+Jenkins user has access to Docker (check with docker ps under jenkins user)
+
+You have a Docker Hub account and credentials
+
+🛠️ Step-by-Step Instructions:
+✅ Step 1: Add Docker Hub Credentials in Jenkins
+Go to Jenkins → Manage Jenkins → Credentials → (global) → Add Credentials
+
+Type: Username with password
+
+ID: dockerhub (you’ll use this ID in the pipeline)
+
+Fill in your Docker Hub username and password
+
+✅ Step 2: Create a Simple Jenkinsfile
+Here’s a basic pipeline you can use:
+
+groovy
+Copy
+Edit
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'yourdockerhubusername/myapp'
+        TAG = 'latest'
+    }
+
+    stages {
+        stage('Clone Repo') {
+            steps {
+                git 'https://github.com/docker/getting-started.git'
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:$TAG .'
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh 'docker push $IMAGE_NAME:$TAG'
+            }
+        }
+    }
+}
+✅ Step 3: Create a Pipeline Job in Jenkins
+Go to Jenkins → New Item
+
+Choose Pipeline
+
+In the Pipeline config:
+
+Choose SCM = Git
+
+Paste the same GitHub repo URL (or your own)
+
+Use Jenkinsfile as the script path
+
+Save and Build Now
