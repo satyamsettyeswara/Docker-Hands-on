@@ -1,0 +1,83 @@
+Multi-Stage Docker Builds in Jenkins Pipelines
+🎯 Goal:
+Use multi-stage builds in your Jenkins pipeline to:
+
+Reduce image size
+
+Keep only production artifacts
+
+Improve build security and speed
+
+🧠 What’s a Multi-Stage Build?
+Instead of installing compilers and dependencies in your final image (which bloats it), you build everything in one stage and copy only the output into a clean, small final image.
+
+✅ Step 1: Sample Multi-Stage Dockerfile
+Create a Dockerfile like this (or use a Git repo with it):
+
+Dockerfile
+Copy
+Edit
+# Stage 1: Build the app
+FROM golang:1.20-alpine as builder
+
+WORKDIR /app
+COPY . .
+RUN go build -o myapp
+
+# Stage 2: Create a tiny production image
+FROM alpine:latest
+
+WORKDIR /app
+COPY --from=builder /app/myapp .
+
+CMD ["./myapp"]
+✅ Step 2: Update Jenkinsfile
+Use a simplified Jenkinsfile like this:
+
+groovy
+Copy
+Edit
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'yourdockerhubusername/myapp-multistage'
+        TAG = 'latest'
+    }
+
+    stages {
+        stage('Clone') {
+            steps {
+                git 'https://github.com/some-golang-repo' // or your own
+            }
+        }
+
+        stage('Build Multi-Stage Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:$TAG .'
+            }
+        }
+
+        stage('Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Push') {
+            steps {
+                sh 'docker push $IMAGE_NAME:$TAG'
+            }
+        }
+    }
+}
+✅ Step 3: Run and Compare Image Size
+After pushing, compare the image size with:
+
+bash
+Copy
+Edit
+docker images | grep myapp
+You’ll notice it’s much smaller than if you built everything in a single image.
