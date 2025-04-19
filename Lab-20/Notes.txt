@@ -1,0 +1,68 @@
+Securing Containers with User Namespaces
+🎯 Goal:
+Use User Namespaces to remap the root user inside containers to a non-root user on the host, reducing the blast radius of container escapes.
+
+🧠 Why It Matters:
+Normally, root inside a container = root on the host (dangerous 😬). With user namespaces, container root maps to a non-privileged UID outside the container.
+
+🛠️ Step-by-Step Instructions:
+⚠️ This lab modifies your Docker daemon config. Proceed carefully.
+
+✅ Step 1: Enable User Namespace Remapping
+Edit or create the Docker daemon config file:
+
+bash
+Copy
+Edit
+sudo nano /etc/docker/daemon.json
+Add this content:
+
+json
+Copy
+Edit
+{
+  "userns-remap": "default"
+}
+"default" tells Docker to create a remapped user and group automatically.
+
+Save and exit.
+
+✅ Step 2: Restart the Docker Daemon
+bash
+Copy
+Edit
+sudo systemctl restart docker
+Verify that it's active:
+
+bash
+Copy
+Edit
+sudo systemctl status docker
+✅ Step 3: Run a Container and Inspect Ownership
+Run a container:
+
+bash
+Copy
+Edit
+docker run -it --rm alpine
+Inside the container:
+
+sh
+Copy
+Edit
+id
+You’ll see you're uid=0(root) inside the container.
+
+Exit the container, then on the host:
+
+bash
+Copy
+Edit
+ls -l /var/lib/docker | grep remapped
+And check:
+
+bash
+Copy
+Edit
+ls -ln /var/lib/docker/overlay2
+You’ll see files owned by a high-numbered UID like 165536 — this is the remapped root.
